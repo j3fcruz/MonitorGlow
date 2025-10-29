@@ -1,0 +1,4 @@
+PyQt5>=5.15.7
+screen_brightness_control>=1.2.0
+cryptography>=41.0.0
+qrcode>=7.4.2
