@@ -13,6 +13,7 @@ Developed by **Marco Polo | PatronHub**
 
 ## 📂 Project Structure
 
+```
 MonitorGlow/
 │
 ├─ main.py                 # Entry point to run the application
@@ -47,7 +48,7 @@ MonitorGlow/
 │   
 ├─ resources_rc.py         # Compiled Qt resource file (.qrc)
 └─ .env                    # Environment variables (API keys, secrets, etc.)
-
+```
 
 
 ---
