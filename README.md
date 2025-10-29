@@ -69,7 +69,7 @@ MonitorGlow/
 
 **Welcome Interface:**
 
-![Main UI](assets/screenshots/welcome_ui.png)
+![Welcome UI](assets/screenshots/welcome_ui.png)
 
 **Main Brightness Controller:**
 
@@ -149,15 +149,21 @@ pip install -r requirements.txt
 
 ## 🧠 Modules Overview
 
-| Module                  | Description                                                       |
-| ----------------------- | ----------------------------------------------------------------- |
-| **monitor_glow.py**     | Main application logic and system tray integration                |
-| **dialogs/**            | Separate dialogs for About, Help, and Donate                       |
-| **core/crypto_utils.py**| Handles encryption/decryption for secure QR donations             |
-| **resources_rc.py**     | Compiled Qt resources (.qrc) including icons and QR files         |
-| **main.py**             | Initializes the application window                                 |
+| Module                        | Description                                                       |
+| ----------------------------- | ----------------------------------------------------------------- |
+| **main.py**                    | Entry point to launch the MonitorGlow application                 |
+| **monitor_glow.py**            | Main UI and core application logic, system tray integration      |
+| **dialogs/About_Dialog.py**    | About dialog window with app info and credits                     |
+| **dialogs/Donate_Dialog.py**   | Donate dialog window with QR codes, PayPal, Ko-fi, and crypto     |
+| **dialogs/Help_Dialog.py**     | Help dialog window with usage instructions and tips               |
+| **core/crypto_utils.py**       | Encryption/decryption utilities for secure QR donations           |
+| **core/monitor.py**            | Monitor detection and brightness control logic                     |
+| **core/utils.py**              | Helper functions (notifications, registry, etc.)                  |
+| **config/app_config.py**       | Application constants, links, QR keys, and configuration settings |
+| **resources_rc.py**            | Compiled Qt resource file (.qrc) including icons and QR files      |
+| **assets/screenshots/**        | UI screenshots for documentation                                   |
+| **.env**                        | Environment variables (API keys, secrets, etc.)                   |
 
----
 
 ## 🎨 Themes
 
@@ -194,7 +200,9 @@ GitHub: [@j3fcruz](https://github.com/j3fcruz)
 Ko-fi: [@marcopolo55681](https://ko-fi.com/marcopolo55681)
 
 💰 PayPal: [@jecfcruz](https://paypal.me/jofreydelacruz13)  
+
 🪙 Crypto: BTC 1BcWJT8gBdZSPwS8UY39X9u4Afu1nZSzqk,ETH xcd5eef32ff4854e4cefa13cb308b727433505bf4
+
 ---
 
 ## 🔑 Notes
