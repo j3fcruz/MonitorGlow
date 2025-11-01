@@ -182,8 +182,6 @@ pip install -r requirements.txt
 5. Push: `git push origin feature/YourFeature`.  
 6. Submit a Pull Request.  
 
-> Follow PEP8 style and modular PyQt5 practices.
-
 ---
 
 ## 📜 License
