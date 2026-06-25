@@ -4,7 +4,7 @@
 
 # MonitorGlow — Multi-Monitor Brightness Controller
 
-**v1.0.0** · Built by [PatronHubDevs Technologies](https://www.patronhubdevs.com) · 🇵🇭 Philippines
+**v1.2.0** · Built by [PatronHubDevs Technologies](https://www.patronhubdevs.com) · 🇵🇭 Philippines
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#-license)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://python.org)
@@ -16,7 +16,7 @@
 > **Advanced Brightness & Screen Manager.**  
 > Intelligent multi-monitor brightness control with system tray integration, global hotkeys, and schedule automation — offline-first, zero telemetry, zero bloat.
 
-[Download](#-installation) · [Screenshots](#-screenshots) · [Modules](#-modules-overview) · [Upgrade to Pro](#-upgrade-to-pro) · [Contributing](#-contributing)
+[Download](#-installation) · [Screenshots](#-screenshots) · [Modules](#-modules-overview) · [Limitations](#-limitations-free-edition) · [Upgrade to Pro](#-upgrade-to-pro) · [Contributing](#-contributing)
 
 ---
 
@@ -32,6 +32,7 @@
 - [Usage](#-usage)
 - [Dependencies](#-dependencies)
 - [Modules Overview](#-modules-overview)
+- [Limitations](#-limitations-free-edition)
 - [Upgrade to Pro](#-upgrade-to-pro)
 - [Contributing](#-contributing)
 - [Privacy](#-privacy)
@@ -201,15 +202,50 @@ pip install -r requirements.txt
 
 ---
 
+## Limitations (Free Edition)
+
+| Feature | Free | Pro |
+|---------|------|-----|
+| Per-monitor brightness control (0–100%) | ✅ | ✅ |
+| Multi-display selector with live hardware read-back | ✅ | ✅ |
+| System tray integration — zero desktop footprint | ✅ | ✅ |
+| Fade-in window animation | ✅ | ✅ |
+| Rotating log file for diagnostics | ✅ | ✅ |
+| Offline operation — no internet required | ✅ | ✅ |
+| Contrast control | ❌ | ✅ |
+| Image / Color tab — White Point, Tone Curve, Color Balance | ❌ | ✅ |
+| Picture tab — Levels (Contrast, Sharpness), Motion (Overdrive) | ❌ | ✅ |
+| Display tab — geometry and display settings | ❌ | ✅ |
+| Geometry tab — display geometry controls | ❌ | ✅ |
+| HDR / Color tab — HDR and color profile management | ❌ | ✅ |
+| Night / Blue Light tab — blue light filter and night mode | ❌ | ✅ |
+| Color Balance — Saturation, Tint (G/R), Hue sliders | ❌ | ✅ |
+| RGB Gain controls (Red, Green, Blue — 50 = Neutral) | ❌ | ✅ |
+| White Point preset (Cool, Warm, Custom Kelvin) | ❌ | ✅ |
+| Picture Preset via DDC | ❌ | ✅ |
+| Speaker Volume via DDC VCP 0x62 | ❌ | ✅ |
+| Nuitka-compiled native EXE — no Python runtime | ❌ | ✅ |
+| Reset to Defaults per-monitor | ❌ | ✅ |
+| Priority updates & bug fixes | ❌ | ✅ |
+
+---
+
 ## Upgrade to Pro
 
-**MonitorGlow Pro** is available on Gumroad and includes the full prebuilt binary with lifetime access:
+**MonitorGlow Pro** unlocks the full display management engine — a complete Settings panel with 6 dedicated tabs giving you granular hardware-level control over every connected monitor via DDC/CI:
 
-- **Standalone executable** — no Python required, runs out of the box
-- **All core features** — per-monitor control, hotkeys, schedule automation, system tray
-- **Lifetime license** — one-time payment, no subscriptions
-- **Future updates** — minor and major releases included
-- **Priority bug fixes** for Pro users
+- **Contrast & Sharpness** — per-monitor levels via Picture tab
+- **Color Balance** — Saturation, Tint (G/R), and Hue sliders
+- **RGB Gain** — individual Red, Green, Blue channel control (50 = Neutral)
+- **White Point** — Cool / Warm / Custom Kelvin presets with Tone Curve (Gamma)
+- **HDR / Color** — HDR profile and color space management
+- **Night / Blue Light** — blue light filter and night mode scheduling
+- **Display & Geometry** — full display geometry controls
+- **Motion / Overdrive** — response time and overdrive mode selection
+- **Speaker Volume** — DDC VCP 0x62 volume control
+- **Picture Presets** — DDC-based preset switching (Custom, Standard, Movie, etc.)
+- **Reset to Defaults** — per-monitor hardware reset
+- **Nuitka-compiled native EXE** — no Python runtime dependency, faster cold-start
 
 > [**Get MonitorGlow Pro on Gumroad →**](https://patronhubdevs.gumroad.com/l/hrildw) — **$10 · One-time · Lifetime License**
 
