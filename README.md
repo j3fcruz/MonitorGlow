@@ -16,7 +16,7 @@
 > **Advanced Brightness & Screen Manager.**  
 > Intelligent multi-monitor brightness control with system tray integration, global hotkeys, and schedule automation — offline-first, zero telemetry, zero bloat.
 
-[Download](#-installation) · [Screenshots](#-screenshots) · [Modules](#-modules-overview) · [Contributing](#-contributing)
+[Download](#-installation) · [Screenshots](#-screenshots) · [Modules](#-modules-overview) · [Upgrade to Pro](#-upgrade-to-pro) · [Contributing](#-contributing)
 
 ---
 
@@ -32,6 +32,7 @@
 - [Usage](#-usage)
 - [Dependencies](#-dependencies)
 - [Modules Overview](#-modules-overview)
+- [Upgrade to Pro](#-upgrade-to-pro)
 - [Contributing](#-contributing)
 - [Privacy](#-privacy)
 - [License](#-license)
@@ -128,7 +129,7 @@ MonitorGlow/
 
 ### Option 1 — Prebuilt Binary (Recommended)
 
-1. Download the latest release from [Ko-fi](https://ko-fi.com/post/Introducing-MonitorGlow-A-Sleek-Brightness-Co-W7W51IJ6S3) or [GitHub Releases](https://github.com/j3fcruz/MonitorGlow/releases)
+1. Download the latest release from [Gumroad](https://patronhubdevs.gumroad.com/l/hrildw) or [GitHub Releases](https://github.com/j3fcruz/MonitorGlow/releases)
 2. Extract the ZIP archive
 3. Run `MonitorGlow.exe`
 
@@ -200,6 +201,20 @@ pip install -r requirements.txt
 
 ---
 
+## Upgrade to Pro
+
+**MonitorGlow Pro** is available on Gumroad and includes the full prebuilt binary with lifetime access:
+
+- **Standalone executable** — no Python required, runs out of the box
+- **All core features** — per-monitor control, hotkeys, schedule automation, system tray
+- **Lifetime license** — one-time payment, no subscriptions
+- **Future updates** — minor and major releases included
+- **Priority bug fixes** for Pro users
+
+> [**Get MonitorGlow Pro on Gumroad →**](https://patronhubdevs.gumroad.com/l/hrildw) — **$10 · One-time · Lifetime License**
+
+---
+
 ## Contributing
 
 1. Fork the repository
@@ -246,6 +261,7 @@ If MonitorGlow has improved your workflow, consider supporting development:
 
 - ⭐ **Star** the repository
 - 📢 **Share** it with your network
+- 💎 **[Get MonitorGlow Pro](https://patronhubdevs.gumroad.com/l/hrildw)** — $10 lifetime license
 - ☕ **[Ko-fi](https://ko-fi.com/marcopolo55681)** · 💸 **[PayPal](https://paypal.me/jofreydelacruz13)**
 - 🪙 **Crypto:** BTC `1BcWJT8gBdZSPwS8UY39X9u4Afu1nZSzqk` · ETH `0xcd5eef32ff4854e4cefa13cb308b727433505bf4`
 
