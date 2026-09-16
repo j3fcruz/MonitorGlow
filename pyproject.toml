@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "monitorglow"
+version = "1.2.0"
+description = "Offline-first cross-platform display and brightness manager"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "PyQt5>=5.15.7,<6",
+  "screen-brightness-control>=1.2.0,<2",
+  "cryptography>=41,<47",
+  "qrcode>=7.4.2,<9",
+  "python-dotenv>=1,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+  "pytest-cov>=5,<7",
+  "ruff>=0.8,<1",
+  "mypy>=1.13,<2",
+  "pip-audit>=2.7,<3",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+exclude = ["resources_rc.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["core", "config"]
+omit = ["resources_rc.py"]
