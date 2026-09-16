@@ -1,11 +1,12 @@
 import logging
 
-from PyQt5.QtCore import QEasingCurve, QPropertyAnimation, Qt
+from PyQt5.QtCore import QEasingCurve, QPropertyAnimation, Qt, pyqtSignal
 from PyQt5.QtGui import QColor, QPalette
 from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
 
 from config.app_config import APP_DEVELOPER, APP_NAME, APP_VERSION, AUTHOR
 from core.display_backend import DisplayError
+from core.display_service import DisplayCommandService
 from core.monitor import ScreenBrightnessBackend
 from dialogs.About_Dialog import AboutDialog
 from dialogs.Donate_Dialog import DonateDialog
@@ -15,11 +16,17 @@ logger = logging.getLogger(__name__)
 
 
 class MonitorGlow(QWidget):
+    brightness_applied = pyqtSignal(int)
+    brightness_failed = pyqtSignal(str)
+
     def __init__(self, backend=None):
         super().__init__()
         self.backend = backend or ScreenBrightnessBackend()
+        self.display_service = DisplayCommandService(self.backend)
         self.displays = []
         self._updating_slider = False
+        self.brightness_applied.connect(self._on_brightness_applied)
+        self.brightness_failed.connect(self._on_brightness_failed)
         self.setWindowTitle(f"{APP_NAME} - {AUTHOR} by {APP_DEVELOPER} v{APP_VERSION}")
         self.setFixedSize(320, 160)
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -107,16 +114,28 @@ class MonitorGlow(QWidget):
         display = self._selected_display()
         if not display:
             return
-        try:
-            self.backend.set_brightness(display.id, value)
-            self.label.setText(f"Brightness: {value}%")
-        except DisplayError as exc:
-            logger.warning("Cannot set brightness: %s", exc)
-            self.label.setText("Brightness change failed")
+        self.label.setText(f"Brightness: {value}%")
+        self.display_service.set_brightness(
+            display.id,
+            value,
+            on_success=self.brightness_applied.emit,
+            on_error=lambda exc: self.brightness_failed.emit(str(exc)),
+        )
+
+    def _on_brightness_applied(self, value):
+        self.label.setText(f"Brightness: {value}%")
+
+    def _on_brightness_failed(self, message):
+        logger.warning("Cannot set brightness: %s", message)
+        self.label.setText("Brightness change failed")
 
     def closeEvent(self, event):
         event.ignore()
         self.hide()
+
+    def shutdown(self):
+        """Release background display resources before application exit."""
+        self.display_service.close()
 
     def fade_in(self):
         self.setWindowOpacity(0)
