@@ -19,11 +19,24 @@ class DisplayOperationError(DisplayError):
 
 
 @dataclass(frozen=True, slots=True)
+class DisplayCapabilities:
+    """Features a backend can safely expose for a display."""
+
+    brightness: bool = True
+    contrast: bool = False
+    volume: bool = False
+    input_source: bool = False
+    rgb_gain: bool = False
+    hdr: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class DisplayInfo:
     """Stable, UI-safe representation of a detected display."""
 
     id: str
     name: str
+    capabilities: DisplayCapabilities = DisplayCapabilities()
 
 
 class DisplayBackend(ABC):
@@ -40,3 +53,10 @@ class DisplayBackend(ABC):
     @abstractmethod
     def set_brightness(self, display_id: str, value: int) -> None:
         raise NotImplementedError
+
+    def get_capabilities(self, display_id: str) -> DisplayCapabilities:
+        """Return conservative capabilities for a display."""
+        for display in self.list_displays():
+            if display.id == display_id:
+                return display.capabilities
+        raise DisplayUnavailableError(f"Display is unavailable: {display_id}")
