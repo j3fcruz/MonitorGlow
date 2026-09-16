@@ -47,7 +47,7 @@ jobs:
           test -d dist || test -f dist/MonitorGlow || test -f dist/MonitorGlow.exe
           find dist -maxdepth 2 -type f -print
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
           path: dist/**
