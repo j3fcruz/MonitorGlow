@@ -14,6 +14,9 @@ def test_get_brightness(monkeypatch):
 
 def test_set_brightness_clamps_value(monkeypatch):
     calls = []
-    monkeypatch.setattr("core.monitor.sbc.set_brightness", lambda value, display: calls.append((value, display)))
+    monkeypatch.setattr(
+        "core.monitor.sbc.set_brightness",
+        lambda value, display: calls.append((value, display)),
+    )
     ScreenBrightnessBackend().set_brightness("Panel A", 150)
     assert calls == [(100, "Panel A")]
