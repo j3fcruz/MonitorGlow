@@ -25,6 +25,9 @@ dev = [
   "mypy>=1.13,<2",
   "pip-audit>=2.7,<3",
 ]
+build = [
+  "pyinstaller>=6.10,<7",
+]
 
 [tool.setuptools]
 py-modules = ["monitor_glow", "resources_rc"]
