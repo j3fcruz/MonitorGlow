@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,7 @@ version = "1.2.0"
 description = "Offline-first cross-platform display and brightness manager"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
 dependencies = [
   "PyQt5>=5.15.7,<6",
   "screen-brightness-control>=1.2.0,<2",
@@ -25,6 +25,14 @@ dev = [
   "mypy>=1.13,<2",
   "pip-audit>=2.7,<3",
 ]
+
+[tool.setuptools]
+py-modules = ["monitor_glow", "resources_rc"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "config*", "dialogs*"]
+exclude = ["assets*", "tests*"]
 
 [tool.ruff]
 target-version = "py310"
