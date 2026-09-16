@@ -1,11 +1,20 @@
 import logging
 
-from PyQt5.QtCore import QEasingCurve, QPropertyAnimation, Qt
+from PyQt5.QtCore import QEasingCurve, QObject, QPropertyAnimation, QTimer, Qt, pyqtSignal
 from PyQt5.QtGui import QColor, QPalette
-from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
 
 from config.app_config import APP_DEVELOPER, APP_NAME, APP_VERSION, AUTHOR
-from core.display_backend import DisplayError
+from core.display_service import DisplayCommandService
 from core.monitor import ScreenBrightnessBackend
 from dialogs.About_Dialog import AboutDialog
 from dialogs.Donate_Dialog import DonateDialog
@@ -14,12 +23,33 @@ from dialogs.Help_Dialog import HelpDialog
 logger = logging.getLogger(__name__)
 
 
+class _DisplaySignals(QObject):
+    displays_ready = pyqtSignal(object)
+    brightness_ready = pyqtSignal(str, object)
+    brightness_written = pyqtSignal(str, int, object)
+
+
 class MonitorGlow(QWidget):
-    def __init__(self, backend=None):
+    def __init__(self, backend=None, service=None):
         super().__init__()
         self.backend = backend or ScreenBrightnessBackend()
+        self.display_service = service or DisplayCommandService(self.backend)
         self.displays = []
         self._updating_slider = False
+        self._signals = _DisplaySignals(self)
+        self._signals.displays_ready.connect(self._apply_display_result)
+        self._signals.brightness_ready.connect(self._apply_brightness_result)
+        self._signals.brightness_written.connect(self._apply_write_result)
+
+        self._refresh_timer = QTimer(self)
+        self._refresh_timer.setInterval(3000)
+        self._refresh_timer.timeout.connect(self.refresh_displays)
+        self._refresh_timer.start()
+
+        app = QApplication.instance()
+        if app is not None:
+            app.aboutToQuit.connect(self.shutdown)
+
         self.setWindowTitle(f"{APP_NAME} - {AUTHOR} by {APP_DEVELOPER} v{APP_VERSION}")
         self.setFixedSize(320, 160)
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -58,10 +88,17 @@ class MonitorGlow(QWidget):
         layout.addWidget(self.slider)
 
         btn_layout = QHBoxLayout()
-        for name, callback in (("About", self.show_about), ("Donate", self.show_donate), ("Help", self.show_help)):
+        buttons = (
+            ("About", self.show_about),
+            ("Donate", self.show_donate),
+            ("Help", self.show_help),
+        )
+        for name, callback in buttons:
             btn = QPushButton(name)
             btn.clicked.connect(callback)
-            btn.setStyleSheet("padding: 6px; background-color: #444; border-radius: 6px;")
+            btn.setStyleSheet(
+                "padding: 6px; background-color: #444; border-radius: 6px;"
+            )
             btn_layout.addWidget(btn)
         layout.addLayout(btn_layout)
         self.setLayout(layout)
@@ -69,16 +106,49 @@ class MonitorGlow(QWidget):
 
     def refresh_displays(self):
         try:
-            self.displays = self.backend.list_displays()
-        except DisplayError as exc:
-            logger.warning("Cannot enumerate displays: %s", exc)
-            self.displays = []
+            future = self.display_service.list_displays()
+        except RuntimeError:
+            return
+        future.add_done_callback(self._display_query_finished)
+
+    def _display_query_finished(self, future):
+        try:
+            result = future.result()
+        except Exception as exc:
+            result = exc
+        self._signals.displays_ready.emit(result)
+
+    def _apply_display_result(self, result):
+        if isinstance(result, Exception):
+            logger.warning("Cannot enumerate displays: %s", result)
+            displays = []
+        else:
+            displays = result
+
+        selected_id = None
+        selected = self._selected_display()
+        if selected is not None:
+            selected_id = selected.id
+
+        current_ids = [display.id for display in self.displays]
+        new_ids = [display.id for display in displays]
+        self.displays = displays
+        if current_ids == new_ids and self.monitor_selector.count() == len(displays):
+            return
+
+        self.monitor_selector.blockSignals(True)
         self.monitor_selector.clear()
-        self.monitor_selector.addItems([display.name for display in self.displays])
-        enabled = bool(self.displays)
+        self.monitor_selector.addItems([display.name for display in displays])
+        if selected_id in new_ids:
+            self.monitor_selector.setCurrentIndex(new_ids.index(selected_id))
+        self.monitor_selector.blockSignals(False)
+
+        enabled = bool(displays)
         self.monitor_selector.setEnabled(enabled)
         self.slider.setEnabled(enabled)
-        self.label.setText("Set Brightness" if enabled else "No controllable display detected")
+        self.label.setText(
+            "Set Brightness" if enabled else "No controllable display detected"
+        )
         if enabled:
             self.update_slider()
 
@@ -91,15 +161,34 @@ class MonitorGlow(QWidget):
         if not display:
             return
         try:
-            brightness = self.backend.get_brightness(display.id)
-        except DisplayError as exc:
-            logger.warning("Cannot read brightness: %s", exc)
+            future = self.display_service.get_brightness(display.id)
+        except RuntimeError:
+            return
+        future.add_done_callback(
+            lambda completed, display_id=display.id: self._brightness_query_finished(
+                display_id, completed
+            )
+        )
+
+    def _brightness_query_finished(self, display_id, future):
+        try:
+            result = future.result()
+        except Exception as exc:
+            result = exc
+        self._signals.brightness_ready.emit(display_id, result)
+
+    def _apply_brightness_result(self, display_id, result):
+        display = self._selected_display()
+        if display is None or display.id != display_id:
+            return
+        if isinstance(result, Exception):
+            logger.warning("Cannot read brightness: %s", result)
             self.label.setText("Brightness unavailable")
             return
         self._updating_slider = True
-        self.slider.setValue(brightness)
+        self.slider.setValue(result)
         self._updating_slider = False
-        self.label.setText(f"Brightness: {brightness}%")
+        self.label.setText(f"Brightness: {result}%")
 
     def set_brightness(self, value):
         if self._updating_slider:
@@ -107,12 +196,43 @@ class MonitorGlow(QWidget):
         display = self._selected_display()
         if not display:
             return
+        self.label.setText(f"Brightness: {value}%")
         try:
-            self.backend.set_brightness(display.id, value)
-            self.label.setText(f"Brightness: {value}%")
-        except DisplayError as exc:
-            logger.warning("Cannot set brightness: %s", exc)
+            self.display_service.set_brightness(
+                display.id,
+                value,
+                callback=lambda completed, display_id=display.id, requested=value: (
+                    self._brightness_write_finished(
+                        display_id,
+                        requested,
+                        completed,
+                    )
+                ),
+            )
+        except RuntimeError:
+            logger.warning("Brightness request ignored after display service shutdown")
+
+    def _brightness_write_finished(self, display_id, value, future):
+        try:
+            future.result()
+            result = None
+        except Exception as exc:
+            result = exc
+        self._signals.brightness_written.emit(display_id, value, result)
+
+    def _apply_write_result(self, display_id, value, error):
+        display = self._selected_display()
+        if display is None or display.id != display_id:
+            return
+        if error is not None:
+            logger.warning("Cannot set brightness: %s", error)
             self.label.setText("Brightness change failed")
+        elif self.slider.value() == value:
+            self.label.setText(f"Brightness: {value}%")
+
+    def shutdown(self):
+        self._refresh_timer.stop()
+        self.display_service.shutdown(wait=False)
 
     def closeEvent(self, event):
         event.ignore()
