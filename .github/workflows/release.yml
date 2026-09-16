@@ -79,7 +79,7 @@ jobs:
           cd release-files
           sha256sum *.tar.gz > SHA256SUMS.txt
       - name: Attest release archives
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: "release-files/*.tar.gz"
       - name: Publish release
