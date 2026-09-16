@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Lock, Timer
-from typing import Callable
 
 from core.display_backend import DisplayBackend, DisplayInfo
 
@@ -98,7 +98,7 @@ class DisplayCommandService:
         if self._closed:
             raise RuntimeError("DisplayCommandService is shut down")
 
-    def __enter__(self) -> "DisplayCommandService":
+    def __enter__(self) -> DisplayCommandService:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
