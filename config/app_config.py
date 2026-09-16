@@ -1,5 +1,7 @@
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
 import resources_rc  # noqa: F401 - registers Qt resources
 
 load_dotenv()
