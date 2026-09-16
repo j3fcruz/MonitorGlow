@@ -1,0 +1,88 @@
+name: Cross-platform Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows-x64
+            artifact: MonitorGlow-Windows-x64
+          - os: ubuntu-latest
+            platform: linux-x64
+            artifact: MonitorGlow-Linux-x64
+          - os: macos-latest
+            platform: macos-arm64
+            artifact: MonitorGlow-macOS-arm64
+          - os: macos-15-intel
+            platform: macos-x64
+            artifact: MonitorGlow-macOS-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install build dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev,build]"
+      - name: Run unit tests
+        run: python -m pytest
+      - name: Build application
+        run: python -m PyInstaller --clean --noconfirm MonitorGlow.spec
+      - name: Verify packaged executable exists
+        shell: bash
+        run: |
+          test -d dist || test -f dist/MonitorGlow || test -f dist/MonitorGlow.exe
+          find dist -maxdepth 2 -type f -print
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/**
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: release-assets
+      - name: Create platform archives and checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-files
+          for dir in release-assets/*; do
+            name=$(basename "$dir")
+            tar -czf "release-files/${name}.tar.gz" -C "$dir" .
+          done
+          cd release-files
+          sha256sum *.tar.gz > SHA256SUMS.txt
+      - name: Attest release archives
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: "release-files/*.tar.gz"
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" release-files/* --verify-tag --generate-notes --title "MonitorGlow ${GITHUB_REF_NAME}"

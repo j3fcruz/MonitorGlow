@@ -1,0 +1,78 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [main, "hardening/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }}, py${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Compile source
+        run: python -m compileall -q config core dialogs main.py monitor_glow.py
+      - name: Unit tests
+        run: python -m pytest --cov=core --cov-report=term-missing
+
+  lint:
+    name: Static quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - run: ruff check config core tests
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - run: pip-audit
+
+  quality-gate:
+    name: Quality gate summary
+    if: always()
+    needs: [test, lint, dependency-audit]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce required jobs
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+          LINT_RESULT: ${{ needs.lint.result }}
+          AUDIT_RESULT: ${{ needs.dependency-audit.result }}
+        run: |
+          echo "test=$TEST_RESULT lint=$LINT_RESULT dependency-audit=$AUDIT_RESULT"
+          test "$TEST_RESULT" = success
+          test "$LINT_RESULT" = success
+          test "$AUDIT_RESULT" = success

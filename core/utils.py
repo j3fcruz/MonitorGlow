@@ -1,13 +1,15 @@
-import sys
 import os
+import sys
+
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtCore import Qt
 
-from config.app_config import AUTHOR, APP_ICON, APP_NAME, APP_DEVELOPER, APP_VERSION
+from config.app_config import APP_DEVELOPER, APP_ICON, APP_NAME, APP_VERSION, AUTHOR
+
 
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and PyInstaller """
+    """Get absolute path to a resource for development and PyInstaller builds."""
     try:
         base_path = sys._MEIPASS
     except AttributeError:
@@ -18,18 +20,18 @@ def resource_path(relative_path):
 def notification_message():
     msg_box = QMessageBox()
     msg_box.setWindowTitle(f"{APP_NAME} – {AUTHOR} by {APP_DEVELOPER} v{APP_VERSION}")
-    msg_box.setText(f"{APP_NAME} is now running in the background.\nYou can access it from the system tray.")
+    msg_box.setText(
+        f"{APP_NAME} is now running in the background.\n"
+        "You can access it from the system tray."
+    )
 
-    # Set window icon (top-left corner)
     msg_box.setWindowIcon(QIcon(APP_ICON))
-
-    # Set custom icon inside the dialog (replaces QMessageBox.Information)
-    msg_box.setIconPixmap(QPixmap(APP_ICON).scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-
+    msg_box.setIconPixmap(
+        QPixmap(APP_ICON).scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+    )
     msg_box.setStandardButtons(QMessageBox.Ok)
-
-    # Custom dark style
-    msg_box.setStyleSheet("""
+    msg_box.setStyleSheet(
+        """
         QWidget {
             font-size: 11pt;
             color: white;
@@ -47,6 +49,6 @@ def notification_message():
         QPushButton:hover {
             background-color: #666;
         }
-    """)
-
+        """
+    )
     msg_box.exec_()
